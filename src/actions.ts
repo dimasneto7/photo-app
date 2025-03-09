@@ -114,3 +114,25 @@ export async function createPost(
 
   redirect('/')
 }
+
+export async function getUserPosts(userId: string) {
+  const session = await auth()
+
+  if (!session) redirect('/')
+
+  if (session.user.userId !== userId) {
+    throw new Error('Não autorizado')
+  }
+
+  return await prisma.post.findMany({
+    where: { userId },
+    include: {
+      user: true,
+      likes: true,
+      comments: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })
+}
