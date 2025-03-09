@@ -43,6 +43,10 @@ export async function updateUserProfile(
     throw new Error('Não autorizado!')
   }
 
+  if (name.length < 5) {
+    return { message: 'Nome precisa ter no mínimo 5 caracteres', type: 'error' }
+  }
+
   let imageUrl
 
   if (imageFile && imageFile.name !== 'undefined') {
@@ -69,4 +73,44 @@ export async function updateUserProfile(
   revalidatePath('/profile')
 
   return { message: 'Perfil atualizado com sucesso!', type: 'success' }
+}
+
+export async function createPost(
+  formState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const session = await auth()
+
+  if (!session) redirect('/')
+
+  const caption = formData.get('caption') as string
+  const imageFile = formData.get('image') as File
+
+  if (!caption || imageFile.size === 0) {
+    return { message: 'Legenda e foto são obrigatórios', type: 'error' }
+  }
+
+  const uploadDir = path.join(process.cwd(), 'public', 'uploads')
+
+  // criar o diretorio
+  await fs.mkdir(uploadDir, { recursive: true })
+  const filePath = path.join(uploadDir, imageFile.name)
+  const arrayBuffer = await imageFile.arrayBuffer()
+
+  // criar o arquivo no diretorio
+  await fs.writeFile(filePath, Buffer.from(arrayBuffer))
+
+  const imageUrl = `/uploads/${imageFile.name}`
+
+  await prisma.post.create({
+    data: {
+      imageUrl,
+      caption,
+      userId: session.user.userId,
+    },
+  })
+
+  revalidatePath('/')
+
+  redirect('/')
 }

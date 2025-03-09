@@ -6,6 +6,7 @@ import Label from './Label'
 import Button from './Button'
 import ImagePreview from './ImagePreview'
 import { useActionState } from 'react'
+import FlashMessage from './FlashMessage'
 
 type ProfileFormProps = {
   user: User
@@ -18,7 +19,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ user }) => {
   })
   return (
     <div className="max-w-[450px] mx-auto">
-      {formState.message && <p>Message</p>}
+      {formState.message && (
+        <FlashMessage message={formState.message} type={formState.type} />
+      )}
       <form
         className="flex flex-col gap-4"
         action={formAction}

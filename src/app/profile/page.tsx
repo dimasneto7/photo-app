@@ -22,7 +22,7 @@ const ProfilePage = async () => {
       {user.email && (
         <div className="w-full flex justify-center my-6">
           <Image
-            src={user.image}
+            src={user.image || '/default-image.png'}
             alt={`Perfil de ${user.name}`}
             className="w-80 h-80 p-4 object-cover"
             width={320}

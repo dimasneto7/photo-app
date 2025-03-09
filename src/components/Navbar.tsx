@@ -32,7 +32,7 @@ const Navbar = async () => {
               Perfil
             </Link>
             <Link
-              href={'/posts/new'}
+              href={'/post/new'}
               className="font-medium hover:font-semibold"
             >
               Criar Postagem
