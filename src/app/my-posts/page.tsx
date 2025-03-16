@@ -1,4 +1,4 @@
-import { getUserPosts } from '@/actions'
+import { deletePost, getUserPosts } from '@/actions'
 import Button from '@/components/Button'
 import ButtonLink from '@/components/ButtonLink'
 import { auth } from 'auth'
@@ -50,7 +50,7 @@ const MyPostsPage: React.FC = async () => {
               {post.caption && (
                 <p className="mb-2 text-sm font-medium">{post.caption}</p>
               )}
-              <form>
+              <form action={deletePost}>
                 <input type="hidden" name="userId" value={userId} />
                 <input type="hidden" name="postId" value={post.id} />
                 <div className="flex justify-end">

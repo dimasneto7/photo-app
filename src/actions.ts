@@ -136,3 +136,100 @@ export async function getUserPosts(userId: string) {
     },
   })
 }
+
+export async function deletePost(formData: FormData) {
+  const session = await auth()
+
+  if (!session) redirect('/')
+
+  const userId = formData.get('userId') as string
+  const postId = formData.get('postId') as string
+
+  if (session.user.userId !== userId) {
+    throw new Error('Não autorizado')
+  }
+
+  await prisma.post.delete({
+    where: { id: postId },
+  })
+
+  revalidatePath('/my-posts')
+
+  redirect('/my-posts')
+}
+
+export async function getAllPosts() {
+  return await prisma.post.findMany({
+    include: {
+      user: true,
+      likes: true,
+      comments: {
+        include: {
+          user: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })
+}
+
+export async function likePost(postId: string, userId: string) {
+  const session = await auth()
+
+  if (!session) redirect('/')
+
+  if (session.user.userId !== userId) {
+    throw new Error('Não autorizado!')
+  }
+
+  // verificar ser o usuário já curtiu o post
+  const existingLike = await prisma.like.findFirst({
+    where: {
+      postId,
+      userId,
+    },
+  })
+
+  if (existingLike) {
+    await prisma.like.delete({
+      where: {
+        id: existingLike.id,
+      },
+    })
+  } else {
+    await prisma.like.create({
+      data: {
+        postId,
+        userId,
+      },
+    })
+  }
+
+  revalidatePath('/')
+}
+
+export async function addComment(
+  postId: string,
+  userId: string,
+  content: string
+) {
+  const session = await auth()
+
+  if (!session) redirect('/')
+
+  if (session.user.userId !== userId) {
+    throw new Error('Não autorizado!')
+  }
+
+  await prisma.comment.create({
+    data: {
+      content,
+      postId,
+      userId,
+    },
+  })
+
+  revalidatePath('/')
+}
